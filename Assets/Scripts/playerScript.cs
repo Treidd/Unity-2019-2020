@@ -9,11 +9,17 @@ public class playerScript : MonoBehaviour
     public int playerSpeed;
     public bool canMove;
     public bool canCamMove;
+    private bool isAlive;
     public instantiator ghosts_instance;
-
+    private camera camera_instance;
+    private GameMaster master_Instance;
+    public GameObject elPanel;
     private void Start()
     {
         ghosts_instance = FindObjectOfType<instantiator>();
+        camera_instance = FindObjectOfType<camera>();
+        master_Instance = FindObjectOfType<GameMaster>();
+        isAlive = true;
     }
 
     private void Update()
@@ -21,7 +27,7 @@ public class playerScript : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.Space)) {
             canMove = true;
         }
-        if (canMove == true) {
+        if (canMove == true && isAlive != false) {
             MovetoDir(playerSpeed);
             if (Vector3.Distance(transform.position, playerGhost.position) <= 0.3f) {
                 canMove = false;
@@ -41,5 +47,15 @@ public class playerScript : MonoBehaviour
         dir.Normalize();
         transform.Translate(dir * Time.deltaTime * speed);
     }
-   
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.collider.tag == "block") {
+            isAlive = false;
+            elPanel.SetActive(true);
+            camera_instance.playerSaMatao = true;
+            master_Instance.PlayAudio();
+            StartCoroutine(master_Instance.ResetScene(0, 2));
+        }
+    }
+    
 }
